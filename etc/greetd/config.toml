@@ -1,0 +1,6 @@
+[terminal]
+vt = 7
+
+[default_session]
+command = "tuigreet -i -t --asterisks --cmd startw"
+user = "_greeter"

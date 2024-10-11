@@ -1,0 +1,14 @@
+# Options for the efibootmgr uki hook script (efibootmgr-uki) in /etc/kernel.d directories
+
+# Disk where EFI Partition is.  Default is /dev/sda
+# DISK="/dev/sda"
+DISK="/dev/nvme0n1"
+
+# Partition number of EFI Partition.  Default is 1
+# PART=1
+PART=1
+
+# Base label of UEFI entry. 
+# "with kernel [version]" will be appended
+# BASE_UEFI_LABEL="Void Linux"
+BASE_UEFI_LABEL="Void Linux"

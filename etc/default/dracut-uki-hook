@@ -1,0 +1,34 @@
+# Options for UKI hook scripts (efibootmgr-uki and uki) in /etc/kernel.d directories
+
+# To allow generation/removal of UKI file(s) AND to 
+# allow efibootmgr to modify UEFI boot entries set
+# UKI_ON=1
+# If this is set to something else than 1, non of the uki scripts in /etc/kernel.d will run
+# Ensure to review the settings in this file and uki-efibootmgr-hook, before you set this to 1
+UKI_ON=1
+
+# Create additional fallback UKI? 
+# yes or no
+# CREATE_FALLBACK_UKI=no
+CREATE_FALLBACK_UKI=no
+
+# Location of dracut configuration file for UKI
+# DRACUT_CONF_FILE="/etc/dracut/void-linux.conf"
+DRACUT_CONF_FILE="/etc/dracut/void-linux.conf"
+
+# Location of dracut configuration file for fallback UKI
+# Only applicable if CREATE_FALLBACK_EFI=yes
+# DRACUT_CONF_FILE_FALLBACK="/etc/dracut/void-linux-fallback.conf"
+DRACUT_CONF_FILE_FALLBACK="/etc/dracut/void-linux-fallback.conf"
+
+# Directory where EFI is mounted
+# EFI_MOUNT="/boot"
+EFI_MOUNT="/efi"
+
+# Directory for UKI files, relative to EFI_MOUNT
+# Will be created if it doesn't exist
+# EFI_FILE_DIR="EFI/Linux"
+UKI_FILE_DIR="EFI/Linux"
+
+# Base UKI filename, without version or .efi
+BASE_UKI_FILE="void-linux"

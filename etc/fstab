@@ -1,0 +1,9 @@
+# /etc/fstab
+
+#<source>        <dir>     <type>    <options>               <dump>  <pass>
+tmpfs             /tmp      tmpfs     defaults,nosuid,nodev   0       0
+LABEL=efi         /efi      vfat      defaults                0       0 
+LABEL=root        /         ext4      defaults                0       1
+
+# NFS mounts
+#10.10.10.21:/mnt/zpool/ark  /mnt/ark  nfs  vers=4.2,async,soft,nolock  0  0

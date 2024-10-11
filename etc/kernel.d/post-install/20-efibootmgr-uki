@@ -1,0 +1,57 @@
+#!/usr/bin/sh
+#
+# UKI post-install hook for efibootmgr.
+#
+# Arguments passed to this script: $1 pkgname, $2 version.
+#
+PKGNAME="$1"
+VERSION="$2"
+
+# Load variables from efibootmgr-uki-hook
+. "${ROOTDIR}/etc/default/efibootmgr-uki-hook"
+
+# Load variables from dracut-uki-hook
+. "${ROOTDIR}/etc/default/dracut-uki-hook"
+if [ "x${UKI_ON}" != x1 ]; then
+  exit 0
+fi
+
+# Get major version, e.g. "4.8" for "linux4.8"
+major_version=$(echo $PKGNAME | cut -c 6-)
+
+# Set UKI Fallback variable
+FALLBACK_UKI=$CREATE_FALLBACK_UKI
+# Construct UKI path/filename for efibootmgr, without .efi
+UKI_FILE_NAME="/${UKI_FILE_DIR}/${BASE_UKI_FILE}-${major_version}"
+
+args=""
+if [ "x${DISK}" != x ]; then
+  args="-d $DISK"
+fi
+if [ "x${PART}" != x ]; then
+  args="$args -p $PART"
+fi
+
+# Look for previous entry for this major kernel version
+existing_entry=$(efibootmgr | grep "${BASE_UEFI_LABEL} with kernel ${major_version}")
+
+# Get the boot order
+# This is required because when in the next step the existing entry is removed,
+# it is also removed from the order so it needs to be restored later
+bootorder=$(efibootmgr | grep "BootOrder: " | cut -c 12-)
+
+# If existing, remove it
+if [ "$existing_entry" != "" ]; then
+  /etc/kernel.d/post-remove/20-efibootmgr-uki $PKGNAME
+fi
+
+# Create new UEFI entry
+efibootmgr -c $args -L "${BASE_UEFI_LABEL} with kernel ${major_version}" -l ${UKI_FILE_NAME}.efi -u
+
+# Create new UEFI fallback entry  - if applicable
+if [ "${FALLBACK_UKI}" = yes ]; then
+  efibootmgr -c $args -L "${BASE_UEFI_LABEL} with kernel ${major_version} Fallback" -l ${UKI_FILE_NAME}-fallback.efi -u
+fi
+
+# Restore the boot order
+efibootmgr -qo $bootorder

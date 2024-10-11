@@ -1,0 +1,37 @@
+#!/bin/sh
+#
+# UKI post-remove hook for efibootmgr.
+#
+# Arguments passed to this script: $1 pkgname, $2 version.
+#
+PKGNAME="$1"
+VERSION="$2"
+
+# Load variables from efibootmgr-uki-hook
+. "${ROOTDIR}/etc/default/efibootmgr-uki-hook"
+
+# Load variables from dracut-uki-hook
+. "${ROOTDIR}/etc/default/dracut-uki-hook"
+if [ "x${UKI_ON}" != x1 ]; then
+  exit 0
+fi
+
+# Get major version, e.g. "4.8" for "linux4.8"
+major_version=$(echo $PKGNAME | cut -c 6-)
+
+# Get hex number of the matching entry
+hexnum=$(efibootmgr | grep "${BASE_UEFI_LABEL} with kernel ${major_version}" | cut -c "5-8")
+
+# Delete it
+[ "$hexnum" ] && efibootmgr -Bq -b $hexnum
+
+# Check if there is a second (fallback) UKI entry and delete it if it's there
+if [ -z "$(efibootmgr | grep "${BASE_UEFI_LABEL} with kernel ${major_version}" | cut -c "5-8")" ]
+then
+  :
+else
+  # Get hex number of the matching entry
+  hexnum=$(efibootmgr | grep "${BASE_UEFI_LABEL} with kernel ${major_version}" | cut -c "5-8")
+  # Delete it
+  [ "$hexnum" ] && efibootmgr -Bq -b $hexnum
+fi

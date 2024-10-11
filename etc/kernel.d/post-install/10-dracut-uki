@@ -1,0 +1,37 @@
+#!/bin/sh
+#
+# UKI post-install hook for dracut.
+#
+# Arguments passed to this script: $1 pkgname, $2 version.
+#
+PKGNAME="$1"
+VERSION="$2"
+
+if [ ! -x usr/bin/dracut ]; then
+  exit 0
+fi
+
+# Load variables from dracut-uki-hook
+. "${ROOTDIR}/etc/default/dracut-uki-hook"
+if [ "x${UKI_ON}" != x1 ]; then
+  exit 0
+fi
+
+# Create UKI file directory if it doesn't exist
+if [ ! -d ${EFI_MOUNT}/${UKI_FILE_DIR} ]; then
+  mkdir -p ${EFI_MOUNT}/${UKI_FILE_DIR}
+fi
+
+# Get major version, e.g. "4.8" for "linux4.8"
+major_version=$(echo $PKGNAME | cut -c 6-)
+
+# Set UKI path/filename for dracut, without .efi
+UKI_FILE_NAME="${EFI_MOUNT}/${UKI_FILE_DIR}/${BASE_UKI_FILE}-${major_version}"
+
+# Generate UKI
+usr/bin/dracut --force --kver ${VERSION} -c ${DRACUT_CONF_FILE} ${UKI_FILE_NAME}.efi
+
+# Generate UKI-fallback and sign with sbctl - if applicable
+if [ "${CREATE_FALLBACK_UKI}" = yes ]; then
+  usr/bin/dracut --force --kver ${VERSION} -c ${DRACUT_CONF_FILE_FALLBACK} ${UKI_FILE_NAME}-fallback.efi
+fi
