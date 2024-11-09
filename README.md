@@ -29,6 +29,7 @@ The goal of this automation is to install Void Linux on a laptop. This setup is 
 ## Prepare UEFI
 Before running the `install-void.sh` script, there are a few thing that need to be setup first.
 1. Enable TPM.
+1. Disable any BIOS passwords (this can cause issues with sbctl).
 1. Boot into BIOS and set secureboot into setup mode.
   1. DELETE all keys
   1. ALLOW microsoft keys (optional)
@@ -51,6 +52,7 @@ Before running the `install-void.sh` script, there are a few thing that need to 
 
 # Post Install
 Once the install is completed remove the USB and reboot back into BIOS.
+1. Set BIOS password.
 1. Enable secureboot.
 1. Remove USB option from boot menu.
 1. Save and reboot. Then login to Void.
