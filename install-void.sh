@@ -8,18 +8,18 @@
 DISK="nvme0n1"
 EFI_SIZE="512MiB"
 PKG_BASE="base-system binutils bluez bolt connman-gtk chrony cryptsetup dbus dhcpcd efibootmgr efitools gummiboot-efistub iptables libavcodec libspa-bluetooth libva-utils mesa-dri mesa-vaapi mesa-vdpau opendoas pipewire sbctl sbsigntool seatd sof-firmware tlp tpm2-tools vulkan-loader wireplumber"
-PKG_APPS="nfs-utils sv-netmount audacity autotiling base-devel bind-utils blueman btop curl evince firefox flatpak foot gimp grim git imv inkscape jq kanshi kdenlive libreoffice-calc libreoffice-gnome libreoffice-impress libreoffice-writer meson mumble neovim nnn nwg-look pavucontrol profanity ripgrep Signal-Desktop slurp starship sound-theme-freedesktop swaybg swayfx swappy swaylock tldr Waybar wget wdisplays wireguard-dkms wireguard-tools wl-clipboard wofi xdg-desktop-portal-gtk xdg-desktop-portal-wlr"
+PKG_APPS="nfs-utils sv-netmount audacity autotiling base-devel bind-utils blueman btop curl evince firefox flatpak foot gimp grim git imv inkscape jq kanshi kdenlive libreoffice-calc libreoffice-gnome libreoffice-impress libreoffice-writer meson mumble neovim nextcloud-client nnn nwg-look obs pavucontrol profanity ripgrep Signal-Desktop slurp starship sound-theme-freedesktop swaybg swayfx swappy swaylock tldr Waybar wget wdisplays wireguard-dkms wireguard-tools wl-clipboard wofi xdg-desktop-portal-gtk xdg-desktop-portal-wlr"
 PKG_AMD="linux-firmware-amd mesa-vulkan-radeon"
 PKG_INTEL="intel-media-driver intel-ucode ipw2100-firmware mesa-vulkan-intel"
 LANG="en_US.UTF-8"
-HOST="loki"
-FQDN="loki.cryogence.org"
-USER="dbegin"
+HOST="mydevice"
+FQDN="mydevice.example.com"
+USER="myusername"
 NET_DEV="eth0"
 NET_CIDR="10.10.20.91/24"
 NET_GW="10.10.20.1"
-NET_DNS1="10.10.10.21"
-NET_DNS2="10.10.10.22"
+NET_DNS1="10.10.10.31"
+NET_DNS2="10.10.10.32"
 
 # Install script package requirements
 xbps-install -Sfy parted
@@ -97,7 +97,7 @@ xbps-install -Sy -R https://repo-fastly.voidlinux.org/current -R https://repo-fa
 # Copy etc into new install
 echo "Copying etc directory to new install..."
 rm -f /mnt/etc/iptables/*
-cp -rf ~/void/etc /mnt/
+cp -rf ~/void-install/etc /mnt/
 
 # Set root permissions
 echo "Setting root permissions..."

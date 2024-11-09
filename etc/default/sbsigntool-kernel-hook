@@ -8,8 +8,8 @@ SBSIGN_EFI_KERNEL=1
 # sbsigntool will only sign if `EFI_KEY_FILE':
 #  - owner: root
 #  - permission: 0*00
-EFI_KEY_FILE=/usr/share/secureboot/keys/db/db.key
-EFI_CERT_FILE=/usr/share/secureboot/keys/db/db.pem
+EFI_KEY_FILE=/var/lib/sbctl/keys/db/db.key
+EFI_CERT_FILE=/var/lib/sbctl/keys/db/db.pem
 
 # set to 1 to keep the unsigned backup
 EFI_KEEP_UNSIGNED=0
