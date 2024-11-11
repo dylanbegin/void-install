@@ -16,4 +16,4 @@ fi
 # get major version, e.g. "4.8" for "linux4.8"
 major_version=$(echo $PKGNAME | cut -c 6-)
 
-rm -f ${EFI_MOUNT}/${UKI_FILE_DIR}/${BASE_UKI_FILE}-${major_version}*.efi
+rm -f ${EFI_MOUNT}/${UKI_FILE_DIR}/${BASE_UKI_FILE}-${VERSION}*.efi

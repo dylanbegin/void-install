@@ -1,5 +1,5 @@
 #!/bin/sh
 
 # Verify secureboot signatures
-sbctl status
-sbctl verify
+#sbctl status
+#sbctl verify

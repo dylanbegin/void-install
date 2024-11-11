@@ -22,7 +22,7 @@ major_version=$(echo $PKGNAME | cut -c 6-)
 # Set UKI Fallback variable
 FALLBACK_UKI=$CREATE_FALLBACK_UKI
 # Construct UKI path/filename for efibootmgr, without .efi
-UKI_FILE_NAME="/${UKI_FILE_DIR}/${BASE_UKI_FILE}-${major_version}"
+UKI_FILE_NAME="/${UKI_FILE_DIR}/${BASE_UKI_FILE}-${VERSION}"
 
 args=""
 if [ "x${DISK}" != x ]; then
@@ -42,7 +42,7 @@ bootorder=$(efibootmgr | grep "BootOrder: " | cut -c 12-)
 
 # If existing, remove it
 if [ "$existing_entry" != "" ]; then
-  /etc/kernel.d/post-remove/20-efibootmgr-uki $PKGNAME
+  /etc/kernel.d/post-remove/50-efibootmgr-uki $PKGNAME
 fi
 
 # Create new UEFI entry

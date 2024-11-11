@@ -26,12 +26,12 @@ fi
 major_version=$(echo $PKGNAME | cut -c 6-)
 
 # Set UKI path/filename for dracut, without .efi
-UKI_FILE_NAME="${EFI_MOUNT}/${UKI_FILE_DIR}/${BASE_UKI_FILE}-${major_version}"
+UKI_FILE_NAME="${EFI_MOUNT}/${UKI_FILE_DIR}/${BASE_UKI_FILE}-${VERSION}"
 
 # Generate UKI
-usr/bin/dracut --force --kver ${VERSION} -c ${DRACUT_CONF_FILE} ${UKI_FILE_NAME}.efi
+usr/bin/dracut --force --verbose --kver $VERSION -c ${DRACUT_CONF_FILE} ${UKI_FILE_NAME}.efi
 
-# Generate UKI-fallback and sign with sbctl - if applicable
+# Generate UKI-fallback
 if [ "${CREATE_FALLBACK_UKI}" = yes ]; then
-  usr/bin/dracut --force --kver ${VERSION} -c ${DRACUT_CONF_FILE_FALLBACK} ${UKI_FILE_NAME}-fallback.efi
+  usr/bin/dracut --force --verbose --kver $VERSION -c ${DRACUT_CONF_FILE_FALLBACK} ${UKI_FILE_NAME}-fallback.efi
 fi

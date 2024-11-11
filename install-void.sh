@@ -1,20 +1,20 @@
 #!/bin/bash
-# MAKE sure secureboot is set as the following BEFORE running this script!!
 
-## Script setup ##
-##################
+## Script variables ##
+######################
 
 # Set variables
 DISK="nvme0n1"
-EFI_SIZE="512MiB"
-PKG_BASE="base-system binutils bluez bolt connman-gtk chrony cryptsetup dbus dhcpcd efibootmgr efitools gummiboot-efistub iptables libavcodec libspa-bluetooth libva-utils mesa-dri mesa-vaapi mesa-vdpau opendoas pipewire sbctl sbsigntool seatd sof-firmware tlp tpm2-tools vulkan-loader wireplumber"
+EFI_SIZE="1024MiB"
+PKG_BASE="base-system binutils bluez bolt connman-gtk chrony cryptsetup dbus dhcpcd efibootmgr gummiboot-efistub iptables libavcodec libspa-bluetooth libva-utils mesa-dri mesa-vaapi mesa-vdpau opendoas pipewire seatd sbctl sbsigntool sof-firmware tlp tpm2-tools vulkan-loader wireplumber"
 PKG_APPS="nfs-utils sv-netmount audacity autotiling base-devel bind-utils blueman btop curl evince firefox flatpak foot gimp grim git imv inkscape jq kanshi kdenlive libreoffice-calc libreoffice-gnome libreoffice-impress libreoffice-writer meson mumble neovim nextcloud-client nnn nwg-look obs pavucontrol profanity ripgrep Signal-Desktop slurp starship sound-theme-freedesktop swaybg swayfx swappy swaylock tldr Waybar wget wdisplays wireguard-dkms wireguard-tools wl-clipboard wofi xdg-desktop-portal-gtk xdg-desktop-portal-wlr"
 PKG_AMD="linux-firmware-amd mesa-vulkan-radeon"
 PKG_INTEL="intel-media-driver intel-ucode ipw2100-firmware mesa-vulkan-intel"
+MAJOR_VERSION=$(uname -r | cut -c -3)
 LANG="en_US.UTF-8"
-HOST="mydevice"
-FQDN="mydevice.example.com"
-USER="myusername"
+HOST="loki"
+FQDN="loki.cryogence.org"
+USER="dbegin"
 NET_DEV="eth0"
 NET_CIDR="10.10.20.91/24"
 NET_GW="10.10.20.1"
@@ -40,30 +40,30 @@ fi
 
 # Format the boot disk
 echo "Formating the disk ${DISK}..."
-dd if=/dev/zero of=/dev/$DISK bs=1M count=100
+dd if=/dev/zero of=/dev/${DISK} bs=1M count=100
 
 # Create a new gpt partition table
 echo "Creating GPT partition table on ${DISK}..."
-parted -s /dev/$DISK mklabel gpt
+parted -s /dev/${DISK} mklabel gpt
 
 # Create efi partition
 echo "Creating $EFI_SIZE EFI partition..."
-parted -s -a optimal /dev/$DISK mkpart primary fat32 2048s $EFI_SIZE
+parted -s -a optimal /dev/${DISK} mkpart primary fat32 2048s $EFI_SIZE
 
 # Create root partition
 echo "Creating linux partition on rest of free space..."
-parted -s -a optimal /dev/$DISK mkpart primary ext4 $EFI_SIZE 100%
+parted -s -a optimal /dev/${DISK} mkpart primary ext4 $EFI_SIZE 100%
 
 # Set esp on efi partition
 echo "Setting esp flag on EFI partition..."
-parted -s /dev/$DISK set 1 esp on
+parted -s /dev/${DISK} set 1 esp on
 
 ## Disk encryption ##
 #####################
 
 # Encrypt root partition
 echo "Encrypt root partition with LUKS2 aes-512..."
-cryptsetup --label crypt --type luks2 --cipher aes-xts-plain64 --key-size 512 --hash sha512 --iter-time 1000 --use-random luksFormat /dev/${DISK}p2
+cryptsetup --label crypt --type luks2 --cipher aes-xts-plain64 --key-size 256 --hash sha256 --iter-time 1000 --use-random luksFormat /dev/${DISK}p2
 
 # Open encrypted partition
 echo "Opening crypt partition..."
@@ -74,14 +74,14 @@ cryptsetup open --allow-discards --type luks /dev/${DISK}p2 root
 
 # Make filesystems
 echo "Creating filesystems..."
-mkfs.vfat -n efi /dev/${DISK}p1
-mkfs.ext4 -L root /dev/mapper/root
+mkfs.fat -F 32 -n EFI /dev/${DISK}p1
+mkfs.ext4 -L ROOT /dev/mapper/root
 
 # Mounting filesystems
 echo "Mounting filesystems..."
 mount /dev/mapper/root /mnt
-mkdir -p /mnt/efi
-mount /dev/${DISK}p1 /mnt/efi
+mkdir -p /mnt/boot/efi
+mount /dev/${DISK}p1 /mnt/boot/efi
 for dir in dev proc sys run; do
   mkdir -p /mnt/${dir}
   mount --rbind --make-rslave /${dir} /mnt/${dir}
@@ -91,7 +91,10 @@ done
 #########################
 
 # Install void and packages
-echo "Installing Void and nessisary packages..."
+echo "Copying XBPS RSA keys..."
+mkdir -p /mnt/var/db/xbps/keys
+cp /var/db/xbps/keys/* /mnt/var/db/xbps/keys/
+echo "Installing Void and necessary packages..."
 xbps-install -Sy -R https://repo-fastly.voidlinux.org/current -R https://repo-fastly.voidlinux.org/current/nonfree -r /mnt $PKG_ALL
 
 # Copy etc into new install
@@ -102,12 +105,12 @@ cp -rf ~/void-install/etc /mnt/
 # Set root permissions
 echo "Setting root permissions..."
 chroot /mnt chown root:root /
-chroot /mnt chmod 755 /
 
 # Configure locale and language
 echo "Configuring locale and language..."
 echo "LANG=$LANG" > /mnt/etc/locale.conf
 echo "$LANG UTF-8" >> /mnt/etc/default/libc-locales
+chroot /mnt xbps-reconfigure -f glibc-locales
 
 # Set hostname
 echo "Setting hostname..."
@@ -128,13 +131,13 @@ passwd -R /mnt root
 # Setup primary user
 echo "Setting up ${USER}..."
 chroot /mnt useradd -m -G wheel,audio,video,cdrom,optical,storage,kvm,input,plugdev,users,xbuilder,bluetooth,_pipewire,_seatd -s /bin/bash $USER
-cat <<EOF > /etc/doas.conf
+cat <<EOF > /mnt/etc/doas.conf
 permit nopass keepenv :wheel
 
 EOF
 mkdir -p /mnt/etc/sudoers.d
-echo "$USER ALL=(ALL:ALL) NOPASSWD: ALL" > /mnt/etc/sudoers.d/$USER
-chmod 600 /mnt/etc/sudoers.d/$USER
+echo "$USER ALL=(ALL:ALL) NOPASSWD: ALL" > /mnt/etc/sudoers.d/${USER}
+chmod 600 /mnt/etc/sudoers.d/${USER}
 
 # Set primary user password
 echo "Set $USER password..."
@@ -162,7 +165,7 @@ chroot /mnt ln -s /etc/sv/tlp /var/service/
 #chroot /mnt ln -s /usr/share/examples/pipewire/20-pipewire-pulse.conf /etc/pipewire/pipewire.conf.d/
 
 # Configure static IP template for dhcpd
-# Remove pound signs if you want to boot with static IP
+# Remove pound signs if you want to boot with static IP via dhcpd
 echo "Configuring static IP..."
 echo "# Static IP for $NET_DEV" >> /mnt/etc/dhcpcd.conf
 echo "#interface $NET_DEV" >> /mnt/etc/dhcpcd.conf
@@ -173,8 +176,12 @@ echo "#static domain_name_servers=$NET_DNS1 $NET_DNS2" >> /mnt/etc/dhcpcd.conf
 ## Boot configuration ##
 ########################
 
+# Disable runit from remounting everything
+echo "Configuring runit..."
+chroot /mnt mv /etc/runit/core-services/03-filesystems.sh{,.bak}
+
 # Set permissions for secureboot keys
-echo "Setting permissions for secureboot keys..."
+#echo "Setting permissions for secureboot keys..."
 chroot /mnt chattr -i /sys/firmware/efi/efivars/db*
 chroot /mnt chattr -i /sys/firmware/efi/efivars/KEK*
 chroot /mnt chattr -i /sys/firmware/efi/efivars/PK*
@@ -191,6 +198,7 @@ chmod 744 /mnt/etc/kernel.d/post-remove/*
 
 # Find and set crypt partition UUID
 LUKS_CRYPT_UUID="$(lsblk -o NAME,UUID | grep ${DISK}p2 | awk '{print $2}')"
+ROOT_UUID="$(lsblk -o NAME,UUID | grep root | awk '{print $2}')"
 
 # Create boot key
 echo "Creating boot key for LUKS2..."
@@ -205,16 +213,33 @@ echo "root UUID=${LUKS_CRYPT_UUID} /boot/crypt.key luks,discard" >> /mnt/etc/cry
 
 # Set kernel cmdline
 echo "Setting kernel cmdline..."
-echo "kernel_cmdline=\" iommu=pt intel_iommu=igfx_off net.ifnames=0 ipv6.disable=1 quiet loglevel=3 udev.log_level=3 \"" >> /mnt/etc/dracut/void-linux.conf
-echo "kernel_cmdline=\" iommu=pt intel_iommu=igfx_off net.ifnames=0 ipv6.disable=1 quiet loglevel=3 udev.log_level=3 \"" >> /mnt/etc/dracut/void-linux-fallback.conf
+if [ "$CPU_VENDOR" = "GenuineIntel" ]; then
+  echo "kernel_cmdline=\" root=UUID=$ROOT_UUID iommu=pt intel_iommu=igfx_off net.ifnames=0 ipv6.disable=1 quiet loglevel=3 \"" >> /mnt/etc/dracut.conf.d/void-linux.conf
+elif [ "$CPU_VENDOR" = "AuthenticAMD" ]; then
+  echo "kernel_cmdline=\" root=UUID=$ROOT_UUID iommu=pt net.ifnames=0 ipv6.disable=1 quiet loglevel=3 \"" >> /mnt/etc/dracut.conf.d/void-linux.conf
+else
+  echo "Unspported CPU type: $CPU_VENDOR. Using generic kernel_cmdline"
+  echo "kernel_cmdline=\" root=UUID=$ROOT_UUID rootfstype=ext4 rw net.ifnames=0 ipv6.disable=1 quiet loglevel=3 udev.log_level=3 \"" >> /mnt/etc/dracut.conf.d/void-linux.conf
+  exit 1
+fi
+
+# Set efibootmgr configuration file
+echo "Configuring efibootmgr-kernel-hook..."
+cat <<EOF > /mnt/etc/default/efibootmgr-kernel-hook
+MODIFY_EFI_ENTRIES=1
+DISK="/dev/${DISK}"
+PART=1
+EOF
 
 # Reconfigure XBPS
-echo "Generating kernel, initramfs, uki, and locale..."
-chroot /mnt xbps-reconfigure -fa
+echo "Resyncing XBPS to new mirrors..."
+chroot /mnt xbps-install -S
+echo "Generating initramfs, uki, and locale for kernel verison ${MAJOR_VERSION}..."
+chroot /mnt xbps-reconfigure -f linux${MAJOR_VERSION}
 
 VOID_DONE="
 ##############################################
-      Void Linux install has finished!
+     Void Linux ${MAJOR_VERSION} install has finished!
 Please reboot into BIOS and enable secureboot!
 ##############################################
 "
