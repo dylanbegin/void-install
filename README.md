@@ -1,25 +1,15 @@
----
-title: Void Install
-description: Void install on laptop.
-published: true
-date: 2024-04-24
-dateCreated: 2024-04-24
-tags: linux, void, bash
-editor: markdown
----
-
 # Overview
 The goal of this automation is to install Void Linux on a laptop. This setup is using a very minimal and secure install with the following goals:
 1. UEFI system with Secure Boot.
 1. Full disk encryption with LUKS2.
 1. Partitioned as below:
-  1. 512MiB /efi efi partition.
+  1. 1024MiB /efi efi partition.
   1. Rest / root parition.
   1. No swap (not required for sleep).
 1. Void Linux x86 minimal install.
 1. Swayfx windows manager.
-< Mount NFS share with: `sudo mount -t nfs -o vers=4 <ip>:/path /mount/path`
-{is.info}
+> [!TIP]
+> If you want to mount an NFS share to grab any other files you may want to include in your install: `sudo mount -t nfs -o vers=4 <ip>:/path /mount/path`
 
 # Pre Install
 ## Prepair Live USB
@@ -38,8 +28,8 @@ Before running the `install-void.sh` script, there are a few thing that need to 
 1. Set a BIOS password (require for both entering bios and boot menu).
 1. Set boot order to DISK,USB. Remove all other options.
 1. Save and reboot into live install.
-< Don't forget to save all passwords to your password manager!
-{is.warning}
+> [!WARNING]
+> Don't forget to save all passwords to your password manager!
 
 ## Running The Install
 1. Boot into live install.
@@ -72,8 +62,8 @@ flatpak install flathub com.moonlight_stream.Moonlight
 flatpak install flathub com.slack.Slack
 flatpak install flathub io.github.pyfa_org.Pyfa
 ```
-< At this point you are pretty much done with the install. Anything below is my own customizations and dot files, but I'm sharing them here too! Feel free to use whatever you want!
-{is.info}
+[!NOTE]
+> At this point you are pretty much done with the install. Anything below is my own customizations and dot files, but I'm sharing them here too! Feel free to use whatever you want!
 
 ## Theming
 Theming in Linux sucks... a lot. And it sucks even more whithout a DE. The `~/.local/share/` folder already comes with several, fonts, icons/cursors, and themes installed. Below is a general guide on how to unify our theme. Also check out the theming section on the Arch wiki for more information [wiki.archlinux.com](https://wiki.archlinux.org/title/Uniform_look_for_Qt_and_GTK_applications).
@@ -96,11 +86,10 @@ Theming in Linux sucks... a lot. And it sucks even more whithout a DE. The `~/.l
   ```
 
 ### Current theming table
-name type 
+(TBD)
 | Name                                                    | Type    |
 | ----------------------------------------------------- | ---------- |
-| [Nerd Fonts](https://www.nerdfonts.com/font-downloads)                      | Fonts        |
-| [ e]
+| [Nerd Fonts](https://www.nerdfonts.com/font-downloads) | Fonts     |
 
 ## Cleanup packages
 You can cleanup all uneeded packeges with the command below (adjust as needed):
