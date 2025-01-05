@@ -1,4 +1,4 @@
-# Overview
+# [!logo](https://icon.horse/icon/voidlinux.org) Overview
 The goal of this automation is to install Void Linux on a laptop. This setup is using a very minimal and secure install with the following goals:
 1. UEFI system with Secure Boot.
 1. Full disk encryption with LUKS2.
