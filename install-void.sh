@@ -7,7 +7,7 @@
 DISK="nvme0n1"
 EFI_SIZE="1024MiB"
 PKG_BASE="base-system binutils bluez bolt connman-gtk chrony cryptsetup dbus dhcpcd efibootmgr gummiboot-efistub iptables libavcodec libspa-bluetooth libva-utils mesa-dri mesa-vaapi mesa-vdpau opendoas pipewire seatd sbctl sbsigntool sof-firmware tlp tpm2-tools vulkan-loader wireplumber"
-PKG_APPS="nfs-utils sv-netmount audacity autotiling base-devel bind-utils blueman btop curl evince ffmpeg firefox flatpak foot gimp grim git imv inkscape jq kanshi libreoffice-calc libreoffice-gnome libreoffice-impress libreoffice-writer meson mumble neovim nextcloud-client nnn nodejs nwg-look obs qt6-wayland pavucontrol profanity ripgrep Signal-Desktop slurp starship sound-theme-freedesktop swaybg swayfx swappy swaylock tldr upower Waybar wget wdisplays wireguard-dkms wireguard-tools wl-clipboard wofi xdg-desktop-portal-gtk xdg-desktop-portal-wlr"
+PKG_APPS="audacity autotiling base-devel blueman btop curl evince ffmpeg firefox flatpak foot gimp grim git imv inkscape jq kanshi ldns libreoffice-calc libreoffice-gnome libreoffice-impress libreoffice-writer meson mumble neovim nextcloud-client nnn nodejs nwg-look obs qt6-wayland pavucontrol profanity ripgrep Signal-Desktop slurp starship sound-theme-freedesktop swaybg swayfx swappy swaylock tldr upower Waybar wget wdisplays wireguard-dkms wireguard-tools wl-clipboard wofi xdg-desktop-portal-gtk xdg-desktop-portal-wlr"
 PKG_AMD="linux-firmware-amd mesa-vulkan-radeon"
 PKG_INTEL="intel-media-driver intel-ucode ipw2100-firmware mesa-vulkan-intel"
 MAJOR_VERSION=$(uname -r | cut -c -3)
@@ -153,8 +153,6 @@ chroot /mnt ln -s /etc/sv/connmand /var/service/
 chroot /mnt ln -s /etc/sv/dbus /var/service/
 chroot /mnt ln -s /etc/sv/dhcpcd /var/service/
 chroot /mnt ln -s /etc/sv/iptables /var/service/
-chroot /mnt ln -s /etc/sv/netmount /var/service/
-chroot /mnt ln -s /etc/sv/rpcbind /var/service/
 chroot /mnt ln -s /etc/sv/seatd /var/service/
 chroot /mnt ln -s /etc/sv/tlp /var/service/
 

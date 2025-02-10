@@ -34,8 +34,10 @@ Before running the `install-void.sh` script, there are a few thing that need to 
 ## Running The Install
 1. Boot into live install.
 1. Login with `root` password `voidlinux`.
-1. Copy the entire void folder and cd into it.
-1. Adujst any variables in the script you need.
+1. Clone this repo.
+  1. Install git `xbps-install git`.
+  1. Clone repo `git clone https://github.com/dylanbegin/void-install.git`.
+1. Adujst any variables in the script `install-void.sh` you need.
 1. Set the script as executable with `chmod +x install-void.sh`
 1. Run the script with `./install-void.sh`
 1. Follow all propmts and reboot when it's done.
