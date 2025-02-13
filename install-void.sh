@@ -233,7 +233,7 @@ echo "Resyncing XBPS to new mirrors..."
 chroot /mnt xbps-install -S
 
 echo "Removing uneeded packages..."
-chroot /mnt xbps-remove adwaita-icon-theme btrfs-progs f2fs-tools linux-firmware-broadcom linux-firmware-nvidia mdocml sudo void-artwork wifi-firmware xfsprogs amiri-font culmus dejavu-fonts-ttf font-adobe-source-code-pro font-adobe-source-sans-pro-v2 font-adobe-source-serif-pro font-alef font-awesome font-crosextra-caladea-ttf font-crosextra-carlito-ttf font-emoji-one-color font-kacst font-liberation-narrow-ttf font-libertine-graphite-ttf font-reem-kufi-ttf font-sil-gentium-basic font-sil-scheherazade gsfonts liberation-fonts-ttf libreoffice-fonts noto-fonts-ttf noto-fonts-ttf-extra
+chroot /mnt xbps-remove -oO adwaita-icon-theme btrfs-progs f2fs-tools linux-firmware-broadcom linux-firmware-nvidia mdocml sudo void-artwork wifi-firmware xfsprogs amiri-font culmus dejavu-fonts-ttf font-adobe-source-code-pro font-adobe-source-sans-pro-v2 font-adobe-source-serif-pro font-alef font-awesome font-crosextra-caladea-ttf font-crosextra-carlito-ttf font-emoji-one-color font-kacst font-liberation-narrow-ttf font-libertine-graphite-ttf font-reem-kufi-ttf font-sil-gentium-basic font-sil-scheherazade gsfonts liberation-fonts-ttf libreoffice-fonts noto-fonts-ttf noto-fonts-ttf-extra
 
 echo "Generating initramfs, uki, and locale for kernel verison ${VERSION}..."
 chroot /mnt xbps-reconfigure -f linux${VERSION}
