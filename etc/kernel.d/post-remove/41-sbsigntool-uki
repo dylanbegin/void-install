@@ -1,0 +1,25 @@
+#!/bin/sh
+#
+# Kernel hook for sbsigntool.
+#
+# Arguments passed to this script: $1 pkgname, $2 version.
+#
+
+# Load variables from sbsigntool-uki-hook
+. "${ROOTDIR}/etc/default/sbsigntool-uki-hook"
+if [ "x${SBSIGN_EFI_KERNEL}" != x1 ]; then
+	exit 0
+fi
+
+# Load variables from dracut-uki-hook
+. "${ROOTDIR}/etc/default/dracut-uki-hook"
+if [ "x${UKI_ON}" != x1 ]; then
+  exit 0
+fi
+
+PKGNAME="$1"
+VERSION="$2"
+
+if [ -f "${EFI_MOUNT}/${UKI_FILE_DIR}/${BASE_UKI_FILE}-${VERSION}.efi.unsigned" ]; then
+	rm -f "${EFI_MOUNT}/${UKI_FILE_DIR}/${BASE_UKI_FILE}-${VERSION}.efi.unsigned"
+fi

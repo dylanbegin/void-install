@@ -1,25 +1,30 @@
-#!/bin/bash
+#!/bin/sh
 
+touch /root/void-install/install.log
+{
+######################
 ## Script variables ##
 ######################
 
 # Set variables
+MAJOR_VERSION=$(uname -r | awk -F '.' '{print $1}')
+MINOR_VERSION=$(uname -r | awk -F '.' '{print $2}')
+VERSION=${MAJOR_VERSION}.${MINOR_VERSION}
 DISK="nvme0n1"
 EFI_SIZE="1024MiB"
-PKG_BASE="base-system binutils bluez bolt connman-gtk chrony cryptsetup dbus dhcpcd efibootmgr gummiboot-efistub iptables libavcodec libspa-bluetooth libva-utils mesa-dri mesa-vaapi mesa-vdpau opendoas pipewire seatd sbctl sbsigntool sof-firmware tlp tpm2-tools vulkan-loader wireplumber"
+PKG_BASE="base-system binutils bluez bolt connman-gtk chrony cryptsetup dbus dhcpcd efibootmgr iptables libavcodec libspa-bluetooth libva-utils mesa-dri mesa-vaapi mesa-vdpau opendoas pipewire seatd sof-firmware sbctl sbsigntool systemd-boot-efistub tlp tpm2-tools vulkan-loader wireplumber"
 PKG_APPS="audacity autotiling base-devel blueman btop curl evince ffmpeg firefox flatpak foot gimp grim git imv inkscape jq kanshi ldns libreoffice-calc libreoffice-gnome libreoffice-impress libreoffice-writer meson mumble neovim nextcloud-client nnn nodejs nwg-look obs qt6-wayland pavucontrol profanity ripgrep Signal-Desktop slurp starship sound-theme-freedesktop swaybg swayfx swappy swaylock tldr upower Waybar wget wdisplays wireguard-dkms wireguard-tools wl-clipboard wofi xdg-desktop-portal-gtk xdg-desktop-portal-wlr"
 PKG_AMD="linux-firmware-amd mesa-vulkan-radeon"
 PKG_INTEL="intel-media-driver intel-ucode ipw2100-firmware mesa-vulkan-intel"
-MAJOR_VERSION=$(uname -r | cut -c -3)
 LANG="en_US.UTF-8"
 HOST="laptop"
-FQDN="laptop.example.com"
-USER="myusername"
+FQDN="laptop.cryogence.org"
+USER="dbegin"
 NET_DEV="eth0"
-NET_CIDR="10.10.20.91/24"
-NET_GW="10.10.20.1"
-NET_DNS1="10.10.10.31"
-NET_DNS2="10.10.10.32"
+NET_CIDR="10.10.10.92/24"
+NET_GW="10.10.10.1"
+NET_DNS1="10.10.10.21"
+NET_DNS2="10.10.10.22"
 
 # Install script package requirements
 xbps-install -Sfy parted
@@ -35,6 +40,7 @@ else
   exit 1
 fi
 
+#######################
 ## Disk partitioning ##
 #######################
 
@@ -58,6 +64,7 @@ parted -s -a optimal /dev/${DISK} mkpart primary ext4 $EFI_SIZE 100%
 echo "Setting esp flag on EFI partition..."
 parted -s /dev/${DISK} set 1 esp on
 
+#####################
 ## Disk encryption ##
 #####################
 
@@ -69,6 +76,7 @@ cryptsetup --label crypt --type luks2 --cipher aes-xts-plain64 --key-size 256 --
 echo "Opening crypt partition..."
 cryptsetup open --allow-discards --type luks /dev/${DISK}p2 root
 
+######################
 ## Filesystem setup ##
 ######################
 
@@ -80,13 +88,14 @@ mkfs.ext4 -L ROOT /dev/mapper/root
 # Mounting filesystems
 echo "Mounting filesystems..."
 mount /dev/mapper/root /mnt
-mkdir -p /mnt/boot/efi
-mount /dev/${DISK}p1 /mnt/boot/efi
+mkdir -p /mnt/efi
+mount /dev/${DISK}p1 /mnt/efi
 for dir in dev proc sys run; do
   mkdir -p /mnt/${dir}
   mount --rbind --make-rslave /${dir} /mnt/${dir}
 done
 
+#########################
 ## System installation ##
 #########################
 
@@ -121,6 +130,7 @@ echo "127.0.0.1        $FQDN $HOST" >> /mnt/etc/hosts
 echo "Setting localtime..."
 chroot /mnt ln -sf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
 
+##########################
 ## System configuration ##
 ##########################
 
@@ -156,12 +166,6 @@ chroot /mnt ln -s /etc/sv/iptables /var/service/
 chroot /mnt ln -s /etc/sv/seatd /var/service/
 chroot /mnt ln -s /etc/sv/tlp /var/service/
 
-# Setup Pipewire
-#echo "Setting up Pipewire and Wireplumber..."
-#chroot /mnt mkdir -p /etc/pipewire/pipewire.conf.d
-#chroot /mnt ln -s /usr/share/examples/wireplumber/10-wireplumber.conf /etc/pipewire/pipewire.conf.d/
-#chroot /mnt ln -s /usr/share/examples/pipewire/20-pipewire-pulse.conf /etc/pipewire/pipewire.conf.d/
-
 # Configure static IP template for dhcpd
 # Remove pound signs if you want to boot with static IP via dhcpd
 echo "Configuring static IP..."
@@ -171,6 +175,7 @@ echo "#static ip_address=$NET_CIDR" >> /mnt/etc/dhcpcd.conf
 echo "#static routers=$NET_GW" >> /mnt/etc/dhcpcd.conf
 echo "#static domain_name_servers=$NET_DNS1 $NET_DNS2" >> /mnt/etc/dhcpcd.conf
 
+########################
 ## Boot configuration ##
 ########################
 
@@ -179,7 +184,7 @@ echo "Configuring runit..."
 chroot /mnt mv /etc/runit/core-services/03-filesystems.sh{,.bak}
 
 # Set permissions for secureboot keys
-#echo "Setting permissions for secureboot keys..."
+echo "Setting permissions for secureboot keys..."
 chroot /mnt chattr -i /sys/firmware/efi/efivars/db*
 chroot /mnt chattr -i /sys/firmware/efi/efivars/KEK*
 chroot /mnt chattr -i /sys/firmware/efi/efivars/PK*
@@ -188,11 +193,6 @@ chroot /mnt chattr -i /sys/firmware/efi/efivars/PK*
 echo "Preparing secureboot..."
 chroot /mnt sbctl create-keys
 chroot /mnt sbctl enroll-keys --microsoft
-
-# Allow srcipts to be executable
-echo "Ensure boot scripts are executable..."
-chmod 744 /mnt/etc/kernel.d/post-install/*
-chmod 744 /mnt/etc/kernel.d/post-remove/*
 
 # Find and set crypt partition UUID
 LUKS_CRYPT_UUID="$(lsblk -o NAME,UUID | grep ${DISK}p2 | awk '{print $2}')"
@@ -209,36 +209,37 @@ cryptsetup luksAddKey /dev/${DISK}p2 /mnt/boot/crypt.key
 echo "Adding crypttab entries..."
 echo "root UUID=${LUKS_CRYPT_UUID} /boot/crypt.key luks,discard" >> /mnt/etc/crypttab
 
-# Set kernel cmdline
+# Set kernel cmdline for dracut and efibootmgr config
 echo "Setting kernel cmdline..."
 if [ "$CPU_VENDOR" = "GenuineIntel" ]; then
-  echo "kernel_cmdline=\" root=UUID=$ROOT_UUID iommu=pt intel_iommu=igfx_off net.ifnames=0 ipv6.disable=1 quiet loglevel=3 \"" >> /mnt/etc/dracut.conf.d/void-linux.conf
+  echo "kernel_cmdline=\" root=UUID=${ROOT_UUID} iommu=pt intel_iommu=igfx_off net.ifnames=0 ipv6.disable=1 quiet loglevel=3 \"" >> /mnt/etc/dracut.conf.d/void-linux.conf
 elif [ "$CPU_VENDOR" = "AuthenticAMD" ]; then
-  echo "kernel_cmdline=\" root=UUID=$ROOT_UUID iommu=pt net.ifnames=0 ipv6.disable=1 quiet loglevel=3 \"" >> /mnt/etc/dracut.conf.d/void-linux.conf
+  echo "kernel_cmdline=\" root=UUID=${ROOT_UUID} iommu=pt net.ifnames=0 ipv6.disable=1 quiet loglevel=3 \"" >> /mnt/etc/dracut.conf.d/void-linux.conf
 else
   echo "Unspported CPU type: $CPU_VENDOR. Using generic kernel_cmdline"
-  echo "kernel_cmdline=\" root=UUID=$ROOT_UUID rootfstype=ext4 rw net.ifnames=0 ipv6.disable=1 quiet loglevel=3 udev.log_level=3 \"" >> /mnt/etc/dracut.conf.d/void-linux.conf
-  exit 1
+  echo "kernel_cmdline=\" root=UUID=${ROOT_UUID} net.ifnames=0 ipv6.disable=1 quiet loglevel=3 udev.log_level=3 \"" >> /mnt/etc/dracut.conf.d/void-linux.conf
 fi
 
-# Set efibootmgr configuration file
-echo "Configuring efibootmgr-kernel-hook..."
-cat <<EOF > /mnt/etc/default/efibootmgr-kernel-hook
-MODIFY_EFI_ENTRIES=1
-DISK="/dev/${DISK}"
-PART=1
-EOF
+# Allow srcipts to be executable
+echo "Ensure boot scripts are executable..."
+chmod 744 /mnt/etc/kernel.d/post-install/*
+chmod 744 /mnt/etc/kernel.d/post-remove/*
 
 # Reconfigure XBPS
+echo "disabling default mirror..."
+echo "#repository=https://repo-default.voidlinux.org/current" > /mnt/usr/share/xbps.d/00-repository-main.conf
+
 echo "Resyncing XBPS to new mirrors..."
 chroot /mnt xbps-install -S
-echo "Generating initramfs, uki, and locale for kernel verison ${MAJOR_VERSION}..."
-chroot /mnt xbps-reconfigure -f linux${MAJOR_VERSION}
+
+echo "Generating initramfs, uki, and locale for kernel verison ${VERSION}..."
+chroot /mnt xbps-reconfigure -f linux${VERSION}
 
 VOID_DONE="
 ##############################################
-     Void Linux ${MAJOR_VERSION} install has finished!
+     Void Linux ${VERSION} install has finished!
 Please reboot into BIOS and enable secureboot!
 ##############################################
 "
 echo "${VOID_DONE}"
+} 2>&1 | tee /root/void-install/install.log

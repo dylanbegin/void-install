@@ -3,9 +3,9 @@
 #<source>          <dir>      <type>    <options>               <dump>  <pass>
 tmpfs              /tmp       tmpfs     defaults,nosuid,nodev   0       0
 efivarfs  /sys/firmware/efi/efivars     efivarfs  defaults      0       0
-LABEL=EFI          /boot/efi  vfat      defaults                0       0 
+LABEL=EFI          /efi       vfat      defaults                0       0 
 LABEL=ROOT         /          ext4      defaults                0       1
 
 # NFS mounts example
 # Read the void wiki on how to setup NFS
-#10.10.10.21:/path/to/nfs-share  /mnt/nfs-share  nfs  vers=4.2,async,soft,nolock  0  0
+#10.10.10.31:/path/to/nfs-share  /mnt/nfs-share  nfs  vers=4.2,async,soft,nolock  0  0
