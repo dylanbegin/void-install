@@ -56,13 +56,12 @@ flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.f
 Then install any needed apps. For example, I use:
 ```sh
 flatpak install flathub com.github.tchx84.Flatseal
-flatpak install flathub xyz.armcord.ArmCord
 flatpak install flathub com.brave.Browser
 flatpak install flathub com.bitwarden.desktop
+flatpak install flathub dev.vencord.Vesktop
 flatpak install flathub com.jgraph.drawio.desktop
 flatpak install flathub com.moonlight_stream.Moonlight
 flatpak install flathub com.slack.Slack
-flatpak install flathub io.github.pyfa_org.Pyfa
 ```
 [!NOTE]
 > At this point you are pretty much done with the install. Anything below is my own customizations and dot files, but I'm sharing them here too! Feel free to use whatever you want!
