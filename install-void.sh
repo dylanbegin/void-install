@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# TODO
+# Finish NVIDIA configuration.
+
 touch /root/void-install/install.log
 {
 ######################
@@ -10,12 +13,10 @@ touch /root/void-install/install.log
 MAJOR_VERSION=$(uname -r | awk -F '.' '{print $1}')
 MINOR_VERSION=$(uname -r | awk -F '.' '{print $2}')
 VERSION=${MAJOR_VERSION}.${MINOR_VERSION}
+
+# Host variables
 DISK="nvme0n1"
 EFI_SIZE="1024MiB"
-PKG_BASE="base-system binutils bluez bolt connman-gtk chrony cryptsetup dbus dhcpcd efibootmgr exfatprogs iptables libavcodec libspa-bluetooth libva-utils lm_sensors mesa-dri mesa-vaapi mesa-vdpau opendoas pipewire seatd sof-firmware sbctl sbsigntool systemd-boot-efistub tlp tpm2-tools vulkan-loader wireplumber"
-PKG_APPS="audacity autotiling base-devel blueman btop curl evince ffmpeg firefox flatpak flavours foot gimp grim git imv inkscape jq kanshi ldns libreoffice-calc libreoffice-gnome libreoffice-impress libreoffice-writer meson mumble neovim nextcloud-client nnn nodejs nwg-look obs qt6-wayland pavucontrol profanity ripgrep Signal-Desktop slurp starship sound-theme-freedesktop swaybg swayfx swappy swaylock tldr upower Waybar wget wdisplays wireguard-dkms wireguard-tools wl-clipboard wofi xdg-desktop-portal-gtk xdg-desktop-portal-wlr"
-PKG_AMD="linux-firmware-amd mesa-vulkan-radeon"
-PKG_INTEL="intel-media-driver intel-ucode ipw2100-firmware mesa-vulkan-intel"
 LANG="en_US.UTF-8"
 HOST="laptop"
 FQDN="laptop.cryogence.org"
@@ -26,6 +27,19 @@ NET_GW="10.10.10.1"
 NET_DNS1="10.10.10.21"
 NET_DNS2="10.10.10.22"
 
+# Packages to install
+PKG_BASE="base-system binutils bluez bolt connman-gtk chrony cryptsetup dbus dhcpcd efibootmgr exfatprogs iptables libavcodec libspa-bluetooth libva-utils lm_sensors opendoas pipewire seatd sof-firmware sbctl sbsigntool systemd-boot-efistub tlp tpm2-tools wireplumber"
+PKG_APPS="audacity autotiling base-devel blueman btop curl evince ffmpeg firefox flatpak flavours foot gimp grim git imv inkscape jq kanshi ldns libreoffice-calc libreoffice-gnome libreoffice-impress libreoffice-writer meson mumble neovim nextcloud-client nnn nwg-look obs qt6-wayland pavucontrol profanity ripgrep Signal-Desktop slurp starship sound-theme-freedesktop swaybg swayfx swappy swaylock tldr upower Waybar wget wdisplays wireguard-dkms wireguard-tools wl-clipboard wofi xdg-desktop-portal-gtk xdg-desktop-portal-wlr"
+PKG_AMD="linux-firmware-amd mesa-dri mesa-vaapi mesa-vdpau mesa-vulkan-radeon vulkan-loader"
+PKG_INTEL="intel-media-driver intel-ucode ipw2100-firmware mesa-vulkan-intel"
+PKG_NVIDIA="linux-firmware-nvidia"
+
+# Packages to remove on cleanup
+PKG_RM_BASE="adwaita-icon-theme btrfs-progs f2fs-tools linux-firmware-broadcom mdocml sudo void-artwork wifi-firmware xfsprogs amiri-font culmus dejavu-fonts-ttf font-adobe-source-code-pro font-adobe-source-sans-pro-v2 font-adobe-source-serif-pro font-alef font-awesome font-crosextra-caladea-ttf font-crosextra-carlito-ttf font-emoji-one-color font-kacst font-liberation-narrow-ttf font-libertine-graphite-ttf font-reem-kufi-ttf font-sil-gentium-basic font-sil-scheherazade gsfonts liberation-fonts-ttf libreoffice-fonts noto-fonts-ttf noto-fonts-ttf-extra"
+PKG_RM_AMD="linux-firmware-amd"
+PKG_RM_INTEL="linux-firmware-intel intel-ucode"
+PKG_RM_NVIDIA="linux-firmware-nvidia"
+
 # Install script package requirements
 xbps-install -Sfy parted
 
@@ -33,10 +47,13 @@ xbps-install -Sfy parted
 CPU_VENDOR=$(grep vendor_id /proc/cpuinfo | awk 'NR==1 {print $3}')
 if [ "$CPU_VENDOR" = "GenuineIntel" ]; then
   PKG_ALL="$PKG_BASE $PKG_INTEL $PKG_APPS"
+  PKG_RM_ALL="$PKG_RM_BASE $PKG_RM_AMD $PKG_RM_NVIDIA"
 elif [ "$CPU_VENDOR" = "AuthenticAMD" ]; then
   PKG_ALL="$PKG_BASE $PKG_AMD $PKG_APPS"
+  PKG_RM_ALL="$PKG_RM_BASE $PKG_RM_INTEL $PKG_RM_NVIDIA"
 else
   echo "Unspported CPU type: $CPU_VENDOR"
+  echo "Aborting install"
   exit 1
 fi
 
@@ -169,11 +186,14 @@ chroot /mnt ln -s /etc/sv/tlp /var/service/
 # Configure static IP template for dhcpd
 # Remove pound signs if you want to boot with static IP via dhcpd
 echo "Configuring static IP..."
-echo "# Static IP for $NET_DEV" >> /mnt/etc/dhcpcd.conf
-echo "#interface $NET_DEV" >> /mnt/etc/dhcpcd.conf
-echo "#static ip_address=$NET_CIDR" >> /mnt/etc/dhcpcd.conf
-echo "#static routers=$NET_GW" >> /mnt/etc/dhcpcd.conf
-echo "#static domain_name_servers=$NET_DNS1 $NET_DNS2" >> /mnt/etc/dhcpcd.conf
+cat <<EOF >> /mnt/etc/dhcpcd.conf
+
+# Static IP for $NET_DEV
+#interface $NET_DEV
+#static ip_address=$NET_CIDR
+#static routers=$NET_GW
+#static domain_name_servers=$NET_DNS1 $NET_DNS2
+EOF
 
 ########################
 ## Boot configuration ##
@@ -233,7 +253,7 @@ echo "Resyncing XBPS to new mirrors..."
 chroot /mnt xbps-install -S
 
 echo "Removing uneeded packages..."
-chroot /mnt xbps-remove -oO adwaita-icon-theme btrfs-progs f2fs-tools linux-firmware-broadcom linux-firmware-nvidia mdocml sudo void-artwork wifi-firmware xfsprogs amiri-font culmus dejavu-fonts-ttf font-adobe-source-code-pro font-adobe-source-sans-pro-v2 font-adobe-source-serif-pro font-alef font-awesome font-crosextra-caladea-ttf font-crosextra-carlito-ttf font-emoji-one-color font-kacst font-liberation-narrow-ttf font-libertine-graphite-ttf font-reem-kufi-ttf font-sil-gentium-basic font-sil-scheherazade gsfonts liberation-fonts-ttf libreoffice-fonts noto-fonts-ttf noto-fonts-ttf-extra
+chroot /mnt xbps-remove -oO $PKG_RM_ALL
 
 echo "Generating initramfs, uki, and locale for kernel verison ${VERSION}..."
 chroot /mnt xbps-reconfigure -f linux${VERSION}
