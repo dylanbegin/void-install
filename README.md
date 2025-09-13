@@ -36,6 +36,7 @@ Before running the `install-void.sh` script, there are a few thing that need to 
 1. Login with `root` password `voidlinux`.
 1. Clone this repo.
   1. Install git `xbps-install git`.
+  1. If you are getting a trans error, run `xbps-install -S` then try again.
   1. Clone repo `git clone https://github.com/dylanbegin/void-install.git`.
 1. Adujst any variables in the script `install-void.sh` you need.
 1. Set the script as executable with `chmod +x install-void.sh`
