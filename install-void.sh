@@ -10,6 +10,7 @@ touch /root/void-install/install.log
 ######################
 
 # Set variables
+ARCH=x86_64
 MAJOR_VERSION=$(uname -r | awk -F '.' '{print $1}')
 MINOR_VERSION=$(uname -r | awk -F '.' '{print $2}')
 VERSION=${MAJOR_VERSION}.${MINOR_VERSION}
@@ -52,7 +53,7 @@ elif [ "$CPU_VENDOR" = "AuthenticAMD" ]; then
   PKG_ALL="$PKG_BASE $PKG_AMD $PKG_APPS"
   PKG_RM_ALL="$PKG_RM_BASE $PKG_RM_INTEL $PKG_RM_NVIDIA"
 else
-  echo "Unspported CPU type: $CPU_VENDOR"
+  echo "Unsupported CPU type: $CPU_VENDOR"
   echo "Aborting install"
   exit 1
 fi
@@ -121,7 +122,7 @@ echo "Copying XBPS RSA keys..."
 mkdir -p /mnt/var/db/xbps/keys
 cp /var/db/xbps/keys/* /mnt/var/db/xbps/keys/
 echo "Installing Void and necessary packages..."
-xbps-install -Sy -R https://repo-fastly.voidlinux.org/current -R https://repo-fastly.voidlinux.org/current/nonfree -r /mnt $PKG_ALL
+XBPS_ARCH=$ARCH xbps-install -Sfy -R https://repo-default.voidlinux.org/current -R https://repo-default.voidlinux.org/current/nonfree -r /mnt $PKG_ALL
 
 # Copy etc into new install
 echo "Copying etc directory to new install..."
@@ -200,8 +201,8 @@ EOF
 ########################
 
 # Disable runit from remounting everything
-echo "Configuring runit..."
-chroot /mnt mv /etc/runit/core-services/03-filesystems.sh{,.bak}
+#echo "Configuring runit..."
+#chroot /mnt mv /etc/runit/core-services/03-filesystems.sh{,.bak}
 
 # Set permissions for secureboot keys
 echo "Setting permissions for secureboot keys..."
@@ -252,11 +253,32 @@ echo "#repository=https://repo-default.voidlinux.org/current" > /mnt/usr/share/x
 echo "Resyncing XBPS to new mirrors..."
 chroot /mnt xbps-install -S
 
-echo "Removing uneeded packages..."
-chroot /mnt xbps-remove -oO $PKG_RM_ALL
-
 echo "Generating initramfs, uki, and locale for kernel verison ${VERSION}..."
 chroot /mnt xbps-reconfigure -f linux${VERSION}
+
+# Add uneeded packages to ignorelist
+echo "Adding uneeded packages to ignorelist..."
+if [ "$CPU_VENDOR" = "GenuineIntel" ]; then
+  cat <<EOF >> /mnt/etc/xbps.d/01-ignorepkg.conf
+
+ignorepkg=linux-firmware-amd
+ignorepkg=linux-firmware-nvidia
+EOF
+elif [ "$CPU_VENDOR" = "AuthenticAMD" ]; then
+  cat <<EOF >> /mnt/etc/xbps.d/01-ignorepkg.conf
+
+ignorepkg=linux-firmware-intel
+ignorepkg=intel-ucode
+ignorepkg=linux-firmware-nvidia
+EOF
+else
+  echo "Unsupported CPU type: $CPU_VENDOR"
+  echo "not adding any packages to ignore..."
+fi
+
+# Cleanup unneeded packages
+echo "Removing uneeded packages..."
+chroot /mnt xbps-remove -oO $PKG_RM_ALL
 
 VOID_DONE="
 ##############################################
