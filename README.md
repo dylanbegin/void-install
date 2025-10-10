@@ -1,4 +1,4 @@
-# ![logo](https://docs.voidlinux.org/favicon.png) Overview
+#   Overview
 The goal of this automation is to install Void Linux on a laptop. This setup is using a very minimal and secure install with the following goals:
 1. UEFI system with Secure Boot.
 1. Full disk encryption with LUKS2.
@@ -68,7 +68,13 @@ flatpak install flathub com.slack.Slack
 > At this point you are pretty much done with the install. Anything below is my own customizations and dot files, but I'm sharing them here too! Feel free to use whatever you want!
 
 ## Theming
-Theming in Linux sucks... a lot. And it sucks even more whithout a DE. The `~/.local/share/` folder already comes with several, fonts, icons/cursors, and themes installed. Below is a general guide on how to unify our theme. Also check out the theming section on the Arch wiki for more information [wiki.archlinux.com](https://wiki.archlinux.org/title/Uniform_look_for_Qt_and_GTK_applications).
+1. Start with cloning my dotfiles repo: ![github.com](https://github.com/dylanbegin/dotfiles)
+  1. Clone the repo `git clone https://github.com/dylanbegin/dotfiles`
+  1. Copy repo into home directory `cp -r dotfiles/* ${HOME}/ && cp -r dotfiles/.* ${HOME}/`
+  1. Set the install scripts to executible `chmod +x install-*`
+  1. Run the install scripts `./install-<name>.sh`
+
+Theming in Linux sucks... a lot. And it sucks even more whithout a DE. The `~/.local/share/` folder already comes with several, fonts, icons/cursors, and themes installed from the steps above. Below is a general guide on how to unify our theme. Also check out the theming section on the Arch wiki for more information ![wiki.archlinux.com](https://wiki.archlinux.org/title/Uniform_look_for_Qt_and_GTK_applications).
 1. Setup GTk3, icon, and font with `nwg-look`.
 1. Copy `gtk-4.0` folder from `~/.local/share/themes/<theme>/` into `~/.config/`.
 1. QT...fuck this shit. (TBD)
@@ -91,13 +97,7 @@ Theming in Linux sucks... a lot. And it sucks even more whithout a DE. The `~/.l
 (TBD)
 | Name                                                    | Type    |
 | ----------------------------------------------------- | ---------- |
-| [Nerd Fonts](https://www.nerdfonts.com/font-downloads) | Fonts     |
-
-## Cleanup packages
-You can cleanup all uneeded packeges with the command below (adjust as needed):
-```sh
-doas xbps-remove -oO adwaita-icon-theme btrfs-progs f2fs-tools linux-firmware-broadcom linux-firmware-nvidia mdocml sudo void-artwork wifi-firmware xfsprogs amiri-font culmus dejavu-fonts-ttf font-adobe-source-code-pro font-adobe-source-sans-pro-v2 font-adobe-source-serif-pro font-alef font-awesome font-crosextra-caladea-ttf font-crosextra-carlito-ttf font-emoji-one-color font-kacst font-liberation-narrow-ttf font-libertine-graphite-ttf font-reem-kufi-ttf font-sil-gentium-basic font-sil-scheherazade gsfonts liberation-fonts-ttf libreoffice-fonts noto-fonts-ttf noto-fonts-ttf-extra
-```
+| ![Nerd Fonts](https://www.nerdfonts.com/font-downloads) | Fonts     |
 
 ## Bonus Extra Stuff
 Below is some early testing stuff I've been messing around with using DWL. This doesn't really work but might help some others using DWL??
@@ -117,7 +117,7 @@ Below is some early testing stuff I've been messing around with using DWL. This 
 {is.info}
 
 ### DWL WM
-dwl information: [github.com](https://github.com/djpohly/dwl/).
+dwl information: ![github.com](https://github.com/djpohly/dwl/).
 1. Install dependancy packages: `doas xbps-install cairo pango wayland wayland-protocols wlroots xorg-server-xwayland`
 1. Make sure the following repo's are in the `~/build` folder:
    1. dwl: `https://github.com/djpohly/dwl.git`

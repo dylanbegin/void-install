@@ -21,6 +21,7 @@ MIRROR="https://mirrors.servercentral.com/voidlinux"
 DISK="nvme0n1"
 EFI_SIZE="1024MiB"
 LANG="en_US.UTF-8"
+TZ="America/Los_Angeles"
 HOST="laptop"
 FQDN="laptop.cryogence.org"
 USER="dbegin"
@@ -90,7 +91,7 @@ parted -s /dev/${DISK} set 1 esp on
 
 # Encrypt root partition
 echo "Encrypt root partition with LUKS2 aes-512..."
-cryptsetup --label crypt --type luks2 --cipher aes-xts-plain64 --key-size 256 --hash sha256 --iter-time 1000 --use-random luksFormat /dev/${DISK}p2
+cryptsetup --label crypt --type luks2 --cipher aes-xts-plain64 --key-size 512 --hash sha512 --iter-time 1000 --use-random luksFormat /dev/${DISK}p2
 
 # Open encrypted partition
 echo "Opening crypt partition..."
@@ -197,7 +198,7 @@ echo "127.0.0.1        $FQDN $HOST" >> /mnt/etc/hosts
 
 # Set localtime
 echo "Setting localtime..."
-chroot /mnt ln -sf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
+chroot /mnt ln -sf /usr/share/zoneinfo/$TZ /etc/localtime
 
 # Set root password
 echo "Set root password..."
