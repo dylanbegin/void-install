@@ -14,6 +14,8 @@ ARCH=x86_64
 MAJOR_VERSION=$(uname -r | awk -F '.' '{print $1}')
 MINOR_VERSION=$(uname -r | awk -F '.' '{print $2}')
 VERSION=${MAJOR_VERSION}.${MINOR_VERSION}
+# mirrors: https://xmirror.voidlinux.org
+MIRROR="https://mirrors.servercentral.com/voidlinux"
 
 # Host variables
 DISK="nvme0n1"
@@ -30,7 +32,7 @@ NET_DNS2="10.10.10.22"
 
 # Packages to install
 PKG_BASE="base-system binutils bluez bolt connman-gtk chrony cryptsetup dbus dhcpcd efibootmgr exfatprogs iptables libavcodec libspa-bluetooth libva-utils lm_sensors opendoas pipewire seatd sof-firmware sbctl sbsigntool systemd-boot-efistub tlp tpm2-tools wireplumber"
-PKG_APPS="audacity autotiling base-devel blueman btop curl evince ffmpeg firefox flatpak flavours foot gimp grim git imv inkscape jq kanshi ldns libreoffice-calc libreoffice-gnome libreoffice-impress libreoffice-writer meson mumble neovim nextcloud-client nnn nwg-look obs qt6-wayland pavucontrol profanity ripgrep Signal-Desktop slurp starship sound-theme-freedesktop swaybg swayfx swappy swaylock tldr upower Waybar wget wdisplays wireguard-dkms wireguard-tools wl-clipboard wofi xdg-desktop-portal-gtk xdg-desktop-portal-wlr"
+PKG_APPS="audacity autotiling base-devel blueman btop curl evince ffmpeg firefox flatpak flavours foot gimp grim git imv inkscape jq kanshi ldns libreoffice-calc libreoffice-gnome libreoffice-impress libreoffice-writer meson mumble neovim nextcloud-client nmap nnn nwg-look obs qt6-wayland pavucontrol profanity ripgrep Signal-Desktop slurp starship sound-theme-freedesktop swaybg swayfx swappy swaylock tldr upower Waybar wget wdisplays wireguard-dkms wireguard-tools wl-clipboard wofi xdg-desktop-portal-gtk xdg-desktop-portal-wlr"
 PKG_AMD="linux-firmware-amd mesa-dri mesa-vaapi mesa-vdpau mesa-vulkan-radeon vulkan-loader"
 PKG_INTEL="intel-media-driver intel-ucode ipw2100-firmware mesa-vulkan-intel"
 PKG_NVIDIA="linux-firmware-nvidia"
@@ -122,79 +124,12 @@ echo "Copying XBPS RSA keys..."
 mkdir -p /mnt/var/db/xbps/keys
 cp /var/db/xbps/keys/* /mnt/var/db/xbps/keys/
 echo "Installing Void and necessary packages..."
-XBPS_ARCH=$ARCH xbps-install -Sfy -R https://repo-default.voidlinux.org/current -R https://repo-default.voidlinux.org/current/nonfree -r /mnt $PKG_ALL
+XBPS_ARCH=$ARCH xbps-install -Sfy -R ${MIRROR}/current -R ${MIRROR}/current/nonfree -r /mnt $PKG_ALL
 
 # Copy etc into new install
 echo "Copying etc directory to new install..."
 rm -f /mnt/etc/iptables/*
 cp -rf ~/void-install/etc /mnt/
-
-# Set root permissions
-echo "Setting root permissions..."
-chroot /mnt chown root:root /
-
-# Configure locale and language
-echo "Configuring locale and language..."
-echo "LANG=$LANG" > /mnt/etc/locale.conf
-echo "$LANG UTF-8" >> /mnt/etc/default/libc-locales
-chroot /mnt xbps-reconfigure -f glibc-locales
-
-# Set hostname
-echo "Setting hostname..."
-echo $FQDN > /mnt/etc/hostname
-echo "127.0.0.1        $FQDN $HOST" >> /mnt/etc/hosts
-
-# Set localtime
-echo "Setting localtime..."
-chroot /mnt ln -sf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
-
-##########################
-## System configuration ##
-##########################
-
-# Set root password
-echo "Set root password..."
-passwd -R /mnt root
-
-# Setup primary user
-echo "Setting up ${USER}..."
-chroot /mnt useradd -m -G wheel,audio,video,cdrom,optical,storage,kvm,input,plugdev,users,xbuilder,bluetooth,_pipewire,_seatd -s /bin/bash $USER
-cat <<EOF > /mnt/etc/doas.conf
-permit nopass keepenv :wheel
-
-EOF
-mkdir -p /mnt/etc/sudoers.d
-echo "$USER ALL=(ALL:ALL) NOPASSWD: ALL" > /mnt/etc/sudoers.d/${USER}
-chmod 600 /mnt/etc/sudoers.d/${USER}
-
-# Set primary user password
-echo "Set $USER password..."
-chroot /mnt passwd $USER
-
-# Enable services
-echo "Enabling all necessary services..."
-chroot /mnt ln -s /etc/sv/acpid /var/service/
-chroot /mnt ln -s /etc/sv/bluetoothd /var/service/
-chroot /mnt ln -s /etc/sv/boltd /var/service/
-chroot /mnt ln -s /etc/sv/chronyd /var/service/
-chroot /mnt ln -s /etc/sv/connmand /var/service/
-chroot /mnt ln -s /etc/sv/dbus /var/service/
-chroot /mnt ln -s /etc/sv/dhcpcd /var/service/
-chroot /mnt ln -s /etc/sv/iptables /var/service/
-chroot /mnt ln -s /etc/sv/seatd /var/service/
-chroot /mnt ln -s /etc/sv/tlp /var/service/
-
-# Configure static IP template for dhcpd
-# Remove pound signs if you want to boot with static IP via dhcpd
-echo "Configuring static IP..."
-cat <<EOF >> /mnt/etc/dhcpcd.conf
-
-# Static IP for $NET_DEV
-#interface $NET_DEV
-#static ip_address=$NET_CIDR
-#static routers=$NET_GW
-#static domain_name_servers=$NET_DNS1 $NET_DNS2
-EOF
 
 ########################
 ## Boot configuration ##
@@ -241,12 +176,86 @@ else
   echo "kernel_cmdline=\" root=UUID=${ROOT_UUID} net.ifnames=0 ipv6.disable=1 quiet loglevel=3 udev.log_level=3 \"" >> /mnt/etc/dracut.conf.d/void-linux.conf
 fi
 
+##########################
+## System configuration ##
+##########################
+
+# Set root permissions
+echo "Setting root permissions..."
+chroot /mnt chown root:root /
+
+# Configure locale and language
+echo "Configuring locale and language..."
+echo "LANG=$LANG" > /mnt/etc/locale.conf
+echo "$LANG UTF-8" >> /mnt/etc/default/libc-locales
+chroot /mnt xbps-reconfigure -f glibc-locales
+
+# Set hostname
+echo "Setting hostname..."
+echo $FQDN > /mnt/etc/hostname
+echo "127.0.0.1        $FQDN $HOST" >> /mnt/etc/hosts
+
+# Set localtime
+echo "Setting localtime..."
+chroot /mnt ln -sf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
+
+# Set root password
+echo "Set root password..."
+passwd -R /mnt root
+
+# Setup primary user
+echo "Setting up ${USER}..."
+chroot /mnt useradd -m -G wheel,audio,video,cdrom,optical,storage,kvm,input,plugdev,users,xbuilder,bluetooth,_pipewire,_seatd -s /bin/bash $USER
+cat <<EOF > /mnt/etc/doas.conf
+permit nopass keepenv :wheel
+
+EOF
+mkdir -p /mnt/etc/sudoers.d
+echo "$USER ALL=(ALL:ALL) NOPASSWD: ALL" > /mnt/etc/sudoers.d/${USER}
+chmod 600 /mnt/etc/sudoers.d/${USER}
+
+# Set primary user password
+echo "Set $USER password..."
+chroot /mnt passwd $USER
+
+# Enable services
+echo "Enabling all necessary services..."
+chroot /mnt ln -s /etc/sv/acpid /var/service/
+chroot /mnt ln -s /etc/sv/bluetoothd /var/service/
+chroot /mnt ln -s /etc/sv/boltd /var/service/
+chroot /mnt ln -s /etc/sv/chronyd /var/service/
+chroot /mnt ln -s /etc/sv/connmand /var/service/
+chroot /mnt ln -s /etc/sv/dbus /var/service/
+chroot /mnt ln -s /etc/sv/dhcpcd /var/service/
+chroot /mnt ln -s /etc/sv/iptables /var/service/
+chroot /mnt ln -s /etc/sv/seatd /var/service/
+chroot /mnt ln -s /etc/sv/tlp /var/service/
+
+# Configure static IP template for dhcpd
+# Remove pound signs if you want to boot with static IP via dhcpd
+echo "Configuring static IP..."
+cat <<EOF >> /mnt/etc/dhcpcd.conf
+
+# Static IP for $NET_DEV
+#interface $NET_DEV
+#static ip_address=$NET_CIDR
+#static routers=$NET_GW
+#static domain_name_servers=$NET_DNS1 $NET_DNS2
+EOF
+
 # Allow srcipts to be executable
 echo "Ensure boot scripts are executable..."
 chmod 744 /mnt/etc/kernel.d/post-install/*
 chmod 744 /mnt/etc/kernel.d/post-remove/*
 
-# Reconfigure XBPS
+# Set new mirrors
+echo "Setting new mirrors..."
+cat <<EOF >> /mnt/etc/xbps.d/00-repos.conf
+repository=${MIRROR}/current
+repository=${MIRROR}/current/nonfree
+EOF
+
+# Disable default mirror XBPS
 echo "disabling default mirror..."
 echo "#repository=https://repo-default.voidlinux.org/current" > /mnt/usr/share/xbps.d/00-repository-main.conf
 
