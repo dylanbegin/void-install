@@ -73,6 +73,7 @@ flatpak install flathub com.slack.Slack
   1. Copy repo into home directory `cp -r dotfiles/* ${HOME}/ && cp -r dotfiles/.* ${HOME}/`
   1. Set the install scripts to executible `chmod +x install-*`
   1. Run the install scripts `./install-<name>.sh`
+    1. The icon and theme scripts are still very much in development. Do not use these right now.
 
 Theming in Linux sucks... a lot. And it sucks even more whithout a DE. The `~/.local/share/` folder already comes with several, fonts, icons/cursors, and themes installed from the steps above. Below is a general guide on how to unify our theme. Also check out the theming section on the Arch wiki for more information ![wiki.archlinux.com](https://wiki.archlinux.org/title/Uniform_look_for_Qt_and_GTK_applications).
 1. Setup GTk3, icon, and font with `nwg-look`.
@@ -94,10 +95,32 @@ Theming in Linux sucks... a lot. And it sucks even more whithout a DE. The `~/.l
   ```
 
 ### Current theming table
-(TBD)
 | Name                                                    | Type    |
-| ----------------------------------------------------- | ---------- |
-| ![Nerd Fonts](https://www.nerdfonts.com/font-downloads) | Fonts     |
+| ------------------------------------------------------- | ------- |
+| ![Colloid](https://www.pling.com/p/1831077)             | Cursors |
+| ![Dracula](https://www.pling.com/p/1669262/)            | Cursors |
+| ![Fluent](https://www.pling.com/p/1499852)              | Cursors |
+| ![Layan](https://www.pling.com/p/1365214)               | Cursors |
+| ![Nordic](https://www.pling.com/p/1662218)              | Cursors |
+| ![Oreo](https://www.pling.com/p/1360254)                | Cursors |
+| ![Sweet](https://www.pling.com/p/1393084)               | Cursors |
+| ![Nerd Fonts](https://www.nerdfonts.com/font-downloads) | Fonts |
+| ![BigSur](https://www.pling.com/p/1399044)              | Icons |
+| ![Candy](https://www.pling.com/p/1305251)               | Icons |
+| ![Colloid](https://www.pling.com/p/1661983)             | Icons |
+| ![Dracula](https://draculatheme.com/gtk)                | Icons |
+| ![Kora](https://www.pling.com/p/1256209)                | Icons |
+| ![McMuse](https://www.pling.com/p/1348081)              | Icons |
+| ![Nordzy](https://www.pling.com/p/1686927)              | Icons |
+| ![Papirus](https://www.pling.com/p/1166289)             | Icons |
+| ![Reversal](https://www.pling.com/p/1340791)            | Icons |
+| ![Uos](https://www.pling.com/p/1349376)                 | Icons |
+| ![WhiteSur](https://www.pling.com/p/1405756)            | Icons |
+| ![Win10Sur](https://www.pling.com/p/1440037)            | Icons |
+| ![Win11](https://www.pling.com/p/1546069)               | Icons |
+| ![Win11-dark](https://www.pling.com/p/2008298)          | Icons |
+| ![Zafiro-Dracula](https://www.pling.com/p/2259441)      | Icons |
+| ![Zafiro-Nord-Black](https://www.pling.com/p/1956870)   | Icons |
 
 ## Bonus Extra Stuff
 Below is some early testing stuff I've been messing around with using DWL. This doesn't really work but might help some others using DWL??

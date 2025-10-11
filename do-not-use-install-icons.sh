@@ -15,10 +15,6 @@ echo "Make icons directory..."
 mkdir -p ${HOME}/icons
 mkdir -p ${HOME}/.local/share/icons
 
-###########
-# Colloid #
-###########
-
 # Download Colloid Icon pack
 echo "Downloading Colloid Icons pack ${COLLOID_ICON_VER}..."
 wget https://github.com/vinceliuice/Colloid-icon-theme/archive/refs/tags/${COLLOID_ICON_VER}.zip -O ${HOME}/icons/${COLLOID_ICON_VER}.zip
@@ -36,6 +32,7 @@ cd ${HOME}/
 ###########
 # Dracula #
 ###########
+
 
 # Download Dracula zip
 echo "Downloading Dracula Icons pack ${DRACULA_ICON_VER}..."

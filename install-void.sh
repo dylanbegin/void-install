@@ -32,7 +32,7 @@ NET_DNS1="10.10.10.21"
 NET_DNS2="10.10.10.22"
 
 # Packages to install
-PKG_BASE="base-system binutils bluez bolt connman-gtk chrony cryptsetup dbus dhcpcd efibootmgr exfatprogs iptables libavcodec libspa-bluetooth libva-utils lm_sensors opendoas pipewire seatd sof-firmware sbctl sbsigntool systemd-boot-efistub tlp tpm2-tools wireplumber"
+PKG_BASE="base-system binutils bluez bolt connman-gtk chrony cryptsetup dbus dhcpcd efibootmgr exfatprogs iptables libavcodec libspa-bluetooth libva-utils lm_sensors opendoas pipewire seatd sof-firmware sbctl sbsigntool systemd-boot-efistub tlp tpm2-tools vdpauinfo Vulkan-Tools wireplumber"
 PKG_APPS="audacity autotiling base-devel blueman btop curl evince ffmpeg firefox flatpak flavours foot gimp grim git imv inkscape jq kanshi ldns libreoffice-calc libreoffice-gnome libreoffice-impress libreoffice-writer meson mumble neovim nextcloud-client nmap nnn nwg-look obs qt6-wayland pavucontrol profanity ripgrep Signal-Desktop slurp starship sound-theme-freedesktop swaybg swayfx swappy swaylock tldr upower Waybar wget wdisplays wireguard-dkms wireguard-tools wl-clipboard wofi xdg-desktop-portal-gtk xdg-desktop-portal-wlr"
 PKG_AMD="linux-firmware-amd mesa-dri mesa-vaapi mesa-vdpau mesa-vulkan-radeon vulkan-loader"
 PKG_INTEL="intel-media-driver intel-ucode ipw2100-firmware mesa-vulkan-intel"
