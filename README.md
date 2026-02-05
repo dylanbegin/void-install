@@ -1,3 +1,6 @@
+> [!NOTE]
+> This is a mirrored repo.
+
 #   Overview
 The goal of this automation is to install Void Linux on a laptop. This setup is using a very minimal and secure install with the following goals:
 1. UEFI system with Secure Boot.
@@ -95,6 +98,7 @@ Theming in Linux sucks... a lot. And it sucks even more whithout a DE. The `~/.l
   ```
 
 ### Current theming table
+Below is the table of great themes I normally pick from.
 | Name                                                    | Type    |
 | ------------------------------------------------------- | ------- |
 | ![Colloid](https://www.pling.com/p/1831077)             | Cursors |
@@ -121,6 +125,20 @@ Theming in Linux sucks... a lot. And it sucks even more whithout a DE. The `~/.l
 | ![Win11-dark](https://www.pling.com/p/2008298)          | Icons |
 | ![Zafiro-Dracula](https://www.pling.com/p/2259441)      | Icons |
 | ![Zafiro-Nord-Black](https://www.pling.com/p/1956870)   | Icons |
+| ![Catppuccin](https://github.com/Fausto-Korpsvart/Catppuccin-GTK-Theme) | Theme |
+| ![Dracula](https://draculatheme.com/gtk)                                | Theme |
+| ![Everforest](https://github.com/Fausto-Korpsvart/Everforest-GTK-Theme) | Theme |
+| ![Gruvbox](https://github.com/Fausto-Korpsvart/Gruvbox-GTK-Theme)       | Theme |
+| ![Juno](https://github.com/EliverLara/Juno)                             | Theme |
+| ![Kanagawa](https://github.com/Fausto-Korpsvart/Kanagawa-GKT-Theme)     | Theme |
+| ![Material](https://github.com/Fausto-Korpsvart/Material-GTK-Themes)    | Theme |
+| ![Nightfox](https://github.com/Fausto-Korpsvart/Nightfox-GTK-Theme)     | Theme |
+| ![Nordic](https://github.com/EliverLara/Nordic)                         | Theme |
+| ![Rosepine](https://github.com/Fausto-Korpsvart/Rose-Pine-GTK-Theme)    | Theme |
+| ![Squared](https://github.com/EliverLara/Squared)                       | Theme |
+| ![Sweet](https://github.com/EliverLara/Sweet)                           | Theme |
+| ![Tokyonight](https://github.com/Fausto-Korpsvart/Tokyonight-GTK-Theme) | Theme |
+| ![WhiteSur](https://github.com/vinceliuice/WhiteSur-gtk-theme)          | Theme |
 
 ## Bonus Extra Stuff
 Below is some early testing stuff I've been messing around with using DWL. This doesn't really work but might help some others using DWL??
