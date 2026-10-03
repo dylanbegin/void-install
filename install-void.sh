@@ -15,7 +15,7 @@ MAJOR_VERSION=$(uname -r | awk -F '.' '{print $1}')
 MINOR_VERSION=$(uname -r | awk -F '.' '{print $2}')
 VERSION=${MAJOR_VERSION}.${MINOR_VERSION}
 # mirrors: https://xmirror.voidlinux.org
-MIRROR="https://mirrors.servercentral.com/voidlinux"
+MIRROR="https://mirrors.summithq.com/voidlinux/"
 
 # Host variables
 DISK="nvme0n1"
